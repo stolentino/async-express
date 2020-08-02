@@ -8,23 +8,29 @@ app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static('public'));
 
-//CALL BACKS
+//PROMISES
 function getUsers(cb){
-  fs.readFile('data.json', 'utf8', (err, data) => {
-    if (err) return cb(err);
-    const users = JSON.parse(data);
-    return cb(null, users);
+  return new Promise((resolve, reject) => {
+    fs.readFile('data.json', 'utf8', (err, data) => {
+      if (err){
+        return(err);
+      } else {
+        const users = JSON.parse(data);
+        resolve(users);
+      }
+    });
   });
 }
 
 app.get('/', (req,res) => {
-  getUsers((err, users) => {
-    if(err){
-      res.render('error', {error:err});
-    }else{
-      res.render('index', {title: "Users", users: users.users});
-    }
-  });
+  getUsers()
+    .then((users)=> {
+      throw new Error("Noooooooo");
+      res.render('index', {titl: "Users", users: users.users});
+    })
+    .catch((err)=> {
+      res.render('error', {error: err});
+    })
 }); 
 
 
