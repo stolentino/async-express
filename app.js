@@ -4,6 +4,16 @@ const path = require('path');
 
 const app = express();
 
+function asyncHandler(cb){
+  return async (req, res, next)=> {
+    try {
+      await cb(req, res, next);
+    } catch (err) {
+      res.render('error', {error:err});
+    }
+  }
+}
+
 app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static('public'));
@@ -22,15 +32,11 @@ function getUsers(cb){
   });
 }
 
-app.get('/', async (req,res) => {
-  try{
+app.get('/', asyncHandler(async (req,res) => {
     const users = await getUsers();
-    //throw new Error("Noooooooo");
+    //throw new Error("It broke");
     res.render('index', {title: "Users", users: users.users});
-  }catch(err){
-    res.render('error', {error: err});
-  }
-}); 
+})); 
 
 
 app.listen(3000, () => console.log('App listening on port 3000!'));
